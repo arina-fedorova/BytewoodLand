@@ -1,0 +1,14 @@
+﻿{
+  "profiles": {
+    "Casha.Cache": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "applicationUrl": "http://localhost:5002",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "Redis__Host": "localhost:6379"
+      }
+    }
+  }
+}
