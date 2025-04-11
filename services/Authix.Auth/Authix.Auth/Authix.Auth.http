@@ -1,0 +1,6 @@
+@Authix.Auth_HostAddress = http://localhost:5230
+
+GET {{Authix.Auth_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

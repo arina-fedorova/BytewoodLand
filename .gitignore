@@ -1,0 +1,71 @@
+# --------------------------------------
+# BytewoodLand - .gitignore (root level)
+# --------------------------------------
+
+# === .NET build ===
+bin/
+obj/
+*.user
+*.suo
+.cache/
+*.log
+
+# === Rider ===
+.idea/
+
+# === VS Code ===
+.vscode/
+.history/
+
+# === VS / Resharper ===
+.vs/
+*.DotSettings
+*.DotSettings.user
+
+# === Global JSON, lock files ===
+project.lock.json
+global.json
+*.njsproj
+*.dbmdl
+
+# === .NET artifacts ===
+*.dll
+*.exe
+*.pdb
+*.appsettings.local.json
+TestResult.xml
+TestResults/
+*.vspscc
+*.vssscc
+_ReSharper*/
+*.csproj.user
+*.sln.docstates
+
+# === Docker ===
+**/Dockerfile.generated
+docker-compose.override.yml
+*.dockerignore
+docker-volume/
+
+# === Logs and temp ===
+*.log
+*.tmp
+*.bak
+*.swp
+*.DS_Store
+Thumbs.db
+
+# === Node modules (in case you use JS frontends later) ===
+node_modules/
+
+# === Python cache (if any scripting ends up here) ===
+__pycache__/
+*.pyc
+
+# === Bytewood specific (optional!) ===
+/docs/storybook/*.psd
+/tools/*.sh
+/tools/*.ps1
+
+# Optional: ignore personal service configs
+**/appsettings.Development.json

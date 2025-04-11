@@ -1,0 +1,6 @@
+@Casha.Cache_HostAddress = http://localhost:5112
+
+GET {{Casha.Cache_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
