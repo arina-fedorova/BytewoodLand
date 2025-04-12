@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
-using System.Security.Claims;
 using System.Text;
+using Unity.Gateway.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -63,19 +62,8 @@ app.UseSwaggerUI();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapGet("/ping", () => "Unity is alive and routing 🦄");
-
-app.MapGet("/protected", (ClaimsPrincipal user) =>
-{
-    var username = user.Identity?.Name ?? "unknown";
-    return $"Welcome, {username}. You are now inside the protected forest path 🌲🔒";
-}).RequireAuthorization();
-
-app.MapGet("/secret-forest", (ClaimsPrincipal user) =>
-{
-    var name = user.Identity?.Name ?? "unknown";
-    return $"🌳 Welcome to the secret forest, {name}. Only guardians may enter.";
-})
-.RequireAuthorization(new AuthorizeAttribute { Roles = "guardian" });
+app.MapCommonEndpoints();
+app.MapPublicEndpoints();
+app.MapProtectedEndpoints();
 
 app.Run();

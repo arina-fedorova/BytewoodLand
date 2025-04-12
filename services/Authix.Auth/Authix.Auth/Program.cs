@@ -1,3 +1,4 @@
+using Authix.Auth.Services;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -20,13 +21,13 @@ if (app.Environment.IsDevelopment())
 
 app.MapPost("/token", (string username, IConfiguration config) =>
 {
+    var user = UserStore.Find(username);
     var jwtOptions = config.GetSection("Jwt").Get<JwtOptions>();
 
     var claims = new[]
     {
-        new Claim(ClaimTypes.Name, username),
-        new Claim(ClaimTypes.Role, "guardian"),
-        new Claim("forest_role", "wanderer")
+        new Claim(ClaimTypes.Name, user.Username),
+        new Claim(ClaimTypes.Role, user.Role.ToString().ToLower())
     };
 
     var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions!.SecretKey));
