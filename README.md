@@ -144,7 +144,7 @@ BytewoodLand/
 
 ## 🔮 Future Roadmap
 
-- [ ]  JWT-based auth flow from Unity → Authix
+- [x]  JWT-based auth flow from Unity → Authix
 - [ ]  MassTransit with RabbitMQ
 - [ ]  Event-driven cache invalidation
 - [ ]  Serilog + centralized log storage
