@@ -2,33 +2,72 @@
 
 > "Only those with the true sigil may pass."
 
-Authix is the guardian of the forest, issuing JWT tokens to verified users, systems, and trusted beasts. He ensures only approved identities gain access to protected Bytewood services.
+**Authix** is the gatekeeper of Bytewood — issuing signed JWT tokens to verified magical beings. It controls who may enter the protected paths, who watches from afar, and who must remain a wanderer.
+
+---
 
 ## 🔧 Purpose
 
-- User and service authentication
-- Issues signed JWTs with proper claims
-- Handles login/token exchange
-- (Optional later: client credentials flow, refresh tokens)
+- 🧙‍♀️ Authenticate known Bytewood identities
+- 🔐 Issue JWT tokens with assigned roles
+- 🧠 Handle internal role mapping via enum
+- ❌ Prevent unauthorized role claims (e.g. wanderers can't be registered)
+
+---
+
+## 🧠 Identity Model
+
+Authix maintains an **in-memory `UserStore`** of trusted beings — each with:
+
+- A unique name
+- A predefined role:
+    - `guardian` – protectors of secrets
+    - `scout` – event listeners and messengers
+    - `wanderer` – reserved for unauthenticated users only (never assigned)
+
+🔐 All JWTs are signed with a shared key and include standard claims like:
+
+```json
+{
+  "name": "Casha",
+  "role": "guardian",
+  "iss": "bytewood.authix",
+  "aud": "bytewood"
+}
+```
 
 ## 📦 Tech Stack
 
-- .NET 8 Web API
-- IdentityServer / Duende (future)
-- JWT Bearer token issuance
+- [.NET 8](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) Web API
+- JWT Bearer Token generation
+- Custom `UserStore` and `Role` model
+- `ClaimTypes.Name`, `ClaimTypes.Role` used for identity flow
+- (Planned) IdentityServer4 or Duende integration
 
-## 🧩 Integration Points
-
-- Unity.Gateway for authentication
-- Other services that consume/validate JWT
+---
 
 ## 🔐 Endpoints
 
-| Method | Endpoint     | Description        |
-|--------|--------------|--------------------|
-| POST   | `/token`     | Get a JWT token    |
-| POST   | `/login`     | Authenticate user  |
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| POST | `/token` | Issues a JWT for a known user |
 
-## 🚧 Notes
+✅ Currently token exchange is simplified to `?username=...` query for demonstration.
 
-- This service is planned to grow into full IdentityServer integration.
+Future versions will support secure login via password and/or external identity.
+
+---
+
+## 🧩 Integration Points
+
+- ✅ **Unity.Gateway** validates tokens and routes by role
+- ✅ Other Byte Beasts may rely on claims to forward user context
+
+---
+
+## 🚧 Roadmap
+
+- [ ]  Move `UserStore` to persistent database (EF Core or Redis)
+- [ ]  Add `/login` endpoint with password
+- [ ]  Integrate with IdentityServer / OAuth2 flows
+- [ ]  Add refresh token support and token lifetime management
