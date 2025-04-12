@@ -1,4 +1,6 @@
-﻿using Authix.Data.Models;
+﻿using Authix.Auth.Configuration;
+using Authix.Auth.Helpers;
+using Authix.Data.Models;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -12,7 +14,7 @@ public static class GuestEndpoint
     {
         app.MapPost("/guest", (string userName, IConfiguration config) =>
         {
-            var jwtOptions = config.GetSection("Jwt").Get<JwtOptions>();
+            var jwtOptions = JwtSettingsProvider.Get(config);
 
             var claims = new[]
             {

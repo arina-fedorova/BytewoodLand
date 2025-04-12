@@ -7,8 +7,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
-
 builder.Services.AddDbContext<AuthixDbContext>(options =>
 {
     var connString = builder.Configuration.GetConnectionString("Default");

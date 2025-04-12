@@ -9,6 +9,7 @@ obj/
 *.suo
 .cache/
 *.log
+.env
 
 # === Rider ===
 .idea/

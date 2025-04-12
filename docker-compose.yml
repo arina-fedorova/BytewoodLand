@@ -9,6 +9,7 @@ services:
       - authix.auth
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - JWT_SECRET=ThisIsASuperSecureKeyThatIsDefinitelyLongEnough!123456
 
   authix.auth:
     build:
@@ -20,6 +21,7 @@ services:
       - ./data:/app/data
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
+      - JWT_SECRET=ThisIsASuperSecureKeyThatIsDefinitelyLongEnough!123456
 
   tweetle.messenger:
     build:

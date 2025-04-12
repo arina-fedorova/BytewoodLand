@@ -145,6 +145,20 @@ Authix.Data/
 
 ---
 
+## 🔐 Environment Variables
+
+This project uses the following environment variables for JWT authentication:
+
+- `JWT_SECRET` – required by both Authix and Unity to sign/verify tokens
+
+### Example
+
+```python
+JWT_SECRET=ThisIsASuperSecureKeyThatIsDefinitelyLongEnough!123456
+```
+
+---
+
 ## 🔮 Roadmap
 
 - [x]  Migrate `UserStore` to EF Core

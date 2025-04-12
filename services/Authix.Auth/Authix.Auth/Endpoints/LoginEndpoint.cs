@@ -1,4 +1,6 @@
-﻿using Authix.Auth.Models;
+﻿using Authix.Auth.Configuration;
+using Authix.Auth.Helpers;
+using Authix.Auth.Models;
 using Authix.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -21,7 +23,7 @@ public static class LoginEndpoint
                 return Results.Unauthorized();
             }
 
-            var jwtOptions = config.GetSection("Jwt").Get<JwtOptions>();
+            var jwtOptions = JwtSettingsProvider.Get(config);
 
             var claims = new[]
             {
