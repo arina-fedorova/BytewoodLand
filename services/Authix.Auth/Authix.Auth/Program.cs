@@ -25,6 +25,7 @@ app.MapPost("/token", (string username, IConfiguration config) =>
     var claims = new[]
     {
         new Claim(ClaimTypes.Name, username),
+        new Claim(ClaimTypes.Role, "guardian"),
         new Claim("forest_role", "wanderer")
     };
 
