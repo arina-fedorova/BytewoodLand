@@ -9,6 +9,7 @@ obj/
 *.suo
 .cache/
 *.log
+.env
 
 # === Rider ===
 .idea/
@@ -67,5 +68,8 @@ __pycache__/
 /tools/*.sh
 /tools/*.ps1
 
-# Optional: ignore personal service configs
-**/appsettings.Development.json
+# Ignore database files
+/data/*.db
+
+# But keep the folder (so Docker mounts work)
+!data/.gitkeep

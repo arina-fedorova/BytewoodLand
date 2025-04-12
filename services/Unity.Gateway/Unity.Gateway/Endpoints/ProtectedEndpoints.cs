@@ -27,5 +27,18 @@ public static class ProtectedEndpoints
             var name = user.Identity?.Name ?? "unknown";
             return $"🦊 Scout {name}, your event scrolls await!";
         }).RequireAuthorization(new AuthorizeAttribute { Roles = Role.Scout.AsString() });
+
+        app.MapGet("/me", (ClaimsPrincipal user) =>
+        {
+            var name = user.Identity?.Name ?? "unknown";
+            var role = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value ?? "none";
+
+            return Results.Ok(new
+            {
+                name,
+                role,
+                message = $"🔐 You are {name}, a {role} of Bytewood."
+            });
+        }).RequireAuthorization();
     }
 }

@@ -1,50 +1,52 @@
-using Authix.Auth.Services;
+using Authix.Auth.Configuration;
+using Authix.Auth.Endpoints;
+using Authix.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        var jwtOptions = JwtSettingsProvider.Get(builder.Configuration);
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = jwtOptions.Issuer,
+            ValidateAudience = true,
+            ValidAudience = jwtOptions.Audience,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecretKey)),
+            ValidateLifetime = true
+        };
+    });
+builder.Services.AddAuthorization();
 
-builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
+builder.Services.AddDbContext<AuthixDbContext>(options =>
+{
+    var connString = builder.Configuration.GetConnectionString("Default");
+    options.UseSqlite(connString);
+});
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName == "Docker")
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.MapPost("/token", (string username, IConfiguration config) =>
-{
-    var user = UserStore.Find(username);
-    var jwtOptions = config.GetSection("Jwt").Get<JwtOptions>();
+app.UseAuthentication();
+app.UseAuthorization();
 
-    var claims = new[]
-    {
-        new Claim(ClaimTypes.Name, user.Username),
-        new Claim(ClaimTypes.Role, user.Role.ToString().ToLower())
-    };
-
-    var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions!.SecretKey));
-    var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-    var token = new JwtSecurityToken(
-        issuer: jwtOptions.Issuer,
-        audience: jwtOptions.Audience,
-        claims: claims,
-        expires: DateTime.UtcNow.AddHours(1),
-        signingCredentials: creds
-    );
-
-    return Results.Ok(new
-    {
-        token = new JwtSecurityTokenHandler().WriteToken(token)
-    });
-});
+app.MapLoginEndpoint();
+app.MapGuestEndpoint();
+app.MapRefreshEndpoint();
+app.MapDeleteTokenEndpoint();
 
 app.Run();

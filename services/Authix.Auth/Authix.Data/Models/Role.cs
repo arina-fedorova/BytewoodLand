@@ -1,4 +1,4 @@
-﻿namespace Authix.Auth.Models;
+﻿namespace Authix.Data.Models;
 
 public enum Role
 {

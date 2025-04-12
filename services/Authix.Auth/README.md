@@ -2,30 +2,44 @@
 
 > "Only those with the true sigil may pass."
 
-**Authix** is the gatekeeper of Bytewood — issuing signed JWT tokens to verified magical beings. It controls who may enter the protected paths, who watches from afar, and who must remain a wanderer.
+**Authix** is the vigilant gatekeeper of Bytewood — issuing signed JWT tokens to magical beings who prove their identity. It guards the border between the public and the protected, ensuring only those with rightful roles may pass through the mists.
 
 ---
 
 ## 🔧 Purpose
 
 - 🧙‍♀️ Authenticate known Bytewood identities
-- 🔐 Issue JWT tokens with assigned roles
-- 🧠 Handle internal role mapping via enum
-- ❌ Prevent unauthorized role claims (e.g. wanderers can't be registered)
+- 🔐 Issue secure, signed JWT access tokens
+- 🔄 Manage and validate refresh tokens
+- 🧠 Assign roles via a central enum (`Role`)
+- 🪄 Gracefully handle guests and registered users
+- ❌ Enforce `wanderer` as a non-persistent role
 
 ---
 
 ## 🧠 Identity Model
 
-Authix maintains an **in-memory `UserStore`** of trusted beings — each with:
+Authix uses **Entity Framework Core (SQLite)** for persistence and includes:
 
-- A unique name
-- A predefined role:
-    - `guardian` – protectors of secrets
-    - `scout` – event listeners and messengers
-    - `wanderer` – reserved for unauthenticated users only (never assigned)
+- `User` with:
+    - `Username` (unique)
+    - `Role` (`guardian`, `scout`, `wanderer`)
+    - `PasswordHash` (BCrypt)
+- `RefreshToken` with expiration, usage flag, and user linkage
 
-🔐 All JWTs are signed with a shared key and include standard claims like:
+> 🔒 wanderer is a reserved role and can’t be stored in the database.
+
+---
+
+## 🔑 Authentication Flow
+
+| Type | Endpoint | Description |
+| --- | --- | --- |
+| 🧙‍♀️ Registered | `POST /login` | Authenticate with username + password |
+| 🌫️ Guest | `POST /guest?name=...` | Generate short-lived token for wanderers |
+| ♻️ Refresh | `POST /refresh` | Exchange refresh token for a new access token |
+
+All JWTs include standard claims:
 
 ```json
 {
@@ -34,40 +48,114 @@ Authix maintains an **in-memory `UserStore`** of trusted beings — each with:
   "iss": "bytewood.authix",
   "aud": "bytewood"
 }
+
 ```
-
-## 📦 Tech Stack
-
-- [.NET 8](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) Web API
-- JWT Bearer Token generation
-- Custom `UserStore` and `Role` model
-- `ClaimTypes.Name`, `ClaimTypes.Role` used for identity flow
-- (Planned) IdentityServer4 or Duende integration
-
----
 
 ## 🔐 Endpoints
 
-| Method | Endpoint | Description |
+| Method | Path | Purpose |
 | --- | --- | --- |
-| POST | `/token` | Issues a JWT for a known user |
-
-✅ Currently token exchange is simplified to `?username=...` query for demonstration.
-
-Future versions will support secure login via password and/or external identity.
-
----
-
-## 🧩 Integration Points
-
-- ✅ **Unity.Gateway** validates tokens and routes by role
-- ✅ Other Byte Beasts may rely on claims to forward user context
+| `POST` | `/login` | Login with password, receive JWT + refresh |
+| `POST` | `/guest` | Anonymous token for wanderers |
+| `POST` | `/refresh` | Exchange refresh token |
+| `DELETE` | `/tokens/expired` | Cleanup expired or used tokens *(internal)* |
 
 ---
 
-## 🚧 Roadmap
+## 📦 Tech Stack
 
-- [ ]  Move `UserStore` to persistent database (EF Core or Redis)
-- [ ]  Add `/login` endpoint with password
-- [ ]  Integrate with IdentityServer / OAuth2 flows
-- [ ]  Add refresh token support and token lifetime management
+- **.NET 8** Web API (Minimal API style)
+- **Entity Framework Core** with SQLite
+- **BCrypt.Net** for secure password hashing
+- **JWT Bearer** token generation and validation
+- 🔜 *Optional*: IdentityServer / Duende (planned)
+
+---
+
+## 📁 Project Structure
+
+```
+Authix.Auth/
+├── Configuration/
+│   └── JwtOptions.cs
+│   └── JwtSettingsProvider.cs
+├── Endpoints/
+│   ├── LoginEndpoint.cs
+│   ├── GuestEndpoint.cs
+│   ├── RefreshEndpoint.cs
+│   └── DeleteTokenEndpoint.cs
+├── Models/
+│   ├── LoginRequest.cs
+│   └── RefreshRequest.cs
+└── Program.cs
+
+Authix.Data/
+├── AuthixDbContext.cs
+├── AuthixDbContextFactory.cs
+├── Models/
+│   ├── Role.cs
+│   ├── User.cs
+│   └── RefreshToken.cs
+
+```
+
+---
+
+## 🌐 Integration Points
+
+- ✅ **Unity.Gateway** validates and authorizes requests using tokens issued by Authix
+- ✅ **Owla.Observer** logs in automatically and cleans up expired tokens via internal APIs
+
+---
+
+## ⚙️ Environment Setup
+
+Authix expects certain environment variables to be present:
+
+| Variable | Purpose |
+| --- | --- |
+| `JWT_SECRET` | Used to sign access tokens |
+| `ASPNETCORE_ENVIRONMENT` | Set to `Docker` inside container |
+| Volume | `/app/data` folder is mounted to host for DB persistence |
+
+### Example `docker-compose.yml` snippet:
+
+```yaml
+authix.auth:
+  build:
+    context: .
+    dockerfile: services/Authix.Auth/Dockerfile
+  ports:
+    - "5001:8080"
+  volumes:
+    - ./data:/app/data
+  environment:
+    - ASPNETCORE_ENVIRONMENT=Docker
+    - JWT_SECRET=ThisIsASuperSecureKeyThatIsDefinitelyLongEnough!123456
+
+```
+
+---
+
+## 📂 Data Location
+
+- 🗃 Local DB: `./data/bytewood_authix.db`
+- 🐳 Inside Docker: `/app/data/bytewood_authix.db`
+
+---
+
+## 🛣 Roadmap
+
+- [x]  Migrate `UserStore` to EF Core
+- [x]  Add secure `/login` endpoint
+- [x]  Implement refresh token flow
+- [x]  Auto-cleanup expired tokens via **Owla**
+- [ ]  Token expiration settings in config
+- [ ]  Role-based UI or Swagger plugin
+- [ ]  IdentityServer integration
+
+---
+
+## 🧙 Summary
+
+Authix ensures Bytewood remains a protected realm of structured access and graceful authentication. Whether you're a guardian of secrets or a passing wanderer, your journey starts here — with the sigil of trust.

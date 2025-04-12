@@ -1,86 +1,129 @@
 # Unity the Gateway 🦄
 
 > "One gate to route them all, and through the gateway bind them."
+> 
 
-**Unity** is the enchanted entrance to the realm of Bytewood. She stands watch at the forest’s edge, guarding access and guiding each request to the right magical service deep within the woods.
-
-Unity handles:
-
-- 💡 JWT validation
-- 🔁 Role-based routing
-- 🌐 Service abstraction
-- 📜 OpenAPI docs for the outside world
+**Unity** is the enchanted entryway to the Bytewood realm. It stands at the boundary, validating every traveler’s token and guiding them toward the correct Byte Beast — all while ensuring the secret paths remain safe from the curious and unworthy.
 
 ---
 
 ## 🔧 Purpose
 
-- Serve as the **central HTTP entrypoint** to all Byte Beasts
-- Validate and authorize users via **JWT tokens**
-- Forward requests to microservices (reverse proxy-style or direct call)
-- Present clean and complete **API documentation** with Swagger
+- Serve as the **central HTTP entrypoint** to all Bytewood microservices
+- Validate and authorize requests using **JWT tokens** from [Authix 🐉](../Authix.Auth)
+- Handle **role-based routing** and endpoint protection
+- Expose a beautiful **Swagger/OpenAPI** UI for explorers
 
 ---
 
 ## 🔐 Security
 
-- Validates JWT tokens issued by [Authix 🐉](../Authix.Auth)
-- Enforces access via `[Authorize]` and `[Authorize(Roles = "...")]`
-- Denies access to unauthorized creatures (403 🛑)
-- Recognizes 3 magical roles:
-  - `guardian` — full access to protected resources 🌳
-  - `scout` — limited access, used for background or event-driven tasks 🦊
-  - `wanderer` — unauthenticated traveler, allowed in public only 🌿
+Unity enforces strict access rules:
+
+- ✅ Validates JWTs signed by Authix
+- ✅ Applies `[Authorize]` and `[Authorize(Roles = "...")]` attributes
+- ✅ Extracts claims: `ClaimTypes.Name`, `ClaimTypes.Role`
+- ❌ Denies access to unauthorized wanderers
+
+### Recognized Roles
+
+| Role | Description |
+| --- | --- |
+| `guardian` | Full access to protected zones 🌲 |
+| `scout` | Limited access, for observers 🦊 |
+| `wanderer` | Guests — access public endpoints only 🌿 |
 
 ---
 
 ## 📦 Tech Stack
 
-- [.NET 8](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) Minimal API
-- JWT Bearer Authentication
-- Clean endpoint modularization (`PublicEndpoints`, `ProtectedEndpoints`, `CommonEndpoints`)
-- Swagger/OpenAPI with secured JWT flow
+- **.NET 8** Minimal API style
+- **JWT Bearer authentication** via `Microsoft.AspNetCore.Authentication.JwtBearer`
+- **Swagger / OpenAPI** with JWT auth flow
+- Clean route organization via modular **`Endpoints/`** classes
 
 ---
 
-## 🗺️ Available Routes
+### 🗺️ Routes Overview
 
-| Method | Endpoint           | Access        | Role Required | Description                              |
-|--------|--------------------|---------------|---------------|------------------------------------------|
-| GET    | `/`                | Public        | ❌             | Welcome message                          |
-| GET    | `/public-info`     | Public        | ❌             | Info for wanderers                       |
-| GET    | `/protected`       | Protected     | Any           | Echo role & user info                    |
-| GET    | `/secret-forest`   | Protected     | `guardian`    | Private realm for high-trust users       |
-| GET    | `/scout-hq`        | Protected     | `scout`       | Internal tools for scouting roles        |
-| GET    | `/ping`            | Public        | ❌             | Health check                             |
+| Method | Path | Access | Role Required | Description |
+| --- | --- | --- | --- | --- |
+| GET | `/` | Public | ❌ | Friendly welcome message |
+| GET | `/public-info` | Public | ❌ | Available to all wanderers |
+| GET | `/ping` | Public | ❌ | Health check |
+| GET | `/protected` | Protected | Any | Echoes current user's name & role |
+| GET | `/me` | Protected | Any | Returns authenticated user's identity |
+| GET | `/secret-forest` | Protected | `guardian` | Hidden grove for trusted guardians |
+| GET | `/scout-hq` | Protected | `scout` | Base for scouting and observation |
 
-🛡️ Unauthorized users will receive `403 Forbidden` on protected routes.
-
----
-
-## 🔌 Dependencies
-
-- 🔐 [Authix.Auth](../Authix.Auth) for JWT validation
-- 🐦 Tweetle.Messenger — for event/messaging APIs
-- 🐢 Casha.Cache — for data retrieval
-- 🧠 Future beasts: event triggers, telemetry, dashboards
+🛡️ Unauthorized access returns `401 Unauthorized` or `403 Forbidden`.
 
 ---
 
-## 🧩 Extending Unity
+## 🧩 Project Structure
 
-- Add new routes in `Endpoints/` by role or concern
-- Register route groups via extension methods in `Program.cs`
-- Add role policies for multi-role rules
-- Forward claims to internal services (coming soon!)
+```
+Unity.Gateway/
+├── Endpoints/
+│   └── CommonEndpoints.cs
+│   └── PublicEndpoints.cs
+│   └── ProtectedEndpoints.cs
+├── Configuration/
+│   ├── JwtOptions.cs
+└── Program.cs
+```
 
 ---
 
-## 🧙‍♀️ Developer Notes
+## 🔌 Integration Points
 
-- Uses `ClaimTypes.Role` and `ClaimTypes.Name` from validated JWT
-- Enforces casing consistency with `RoleNames` helper
-- Designed to be small, modular, and easy to test
+- 🔐 **Authix.Auth** – Unity trusts Authix to issue and sign all tokens
+- 🐢 **Casha.Cache** – (optional) backend data access
+- 🐦 **Tweetle.Messenger** – message routing
+- 🦉 **Owla.Observer** – internal health + monitoring
+
+---
+
+## 🧙 Developer Notes
+
+- Uses `.AddAuthentication().AddJwtBearer(...)` in `Program.cs`
+- Token claims are parsed using `ClaimTypes.Name` and `ClaimTypes.Role`
+- Roles are compared case-insensitively for flexibility
+- Routes are modular and composable (ideal for growing APIs)
+
+---
+
+## 🔐 Environment Variables
+
+| Name | Description |
+| --- | --- |
+| `JWT_SECRET` | Must match the signing key used in Authix |
+| `ASPNETCORE_ENVIRONMENT` | Set to `Development` or `Docker` |
+
+### Example
+
+```
+JWT_SECRET=ThisIsASuperSecureKeyThatIsDefinitelyLongEnough!123456
+```
+
+---
+
+## 🛠 Deployment Notes
+
+- Port: `8080` internally, mapped to `5000` externally (via Docker)
+- Use consistent networking (`bytewoodnet`) to reach other services
+- Swagger UI available at `/swagger`
+
+---
+
+## 🛣 Roadmap
+
+- [x]  JWT validation + role authorization
+- [x]  Modular endpoint layout
+- [x]  Swagger integration with JWT flow
+- [ ]  Forward original claims to downstream Byte Beasts
+- [ ]  Dynamic routing rules per role
+- [ ]  Gateway metrics and performance logs
 
 ---
 
