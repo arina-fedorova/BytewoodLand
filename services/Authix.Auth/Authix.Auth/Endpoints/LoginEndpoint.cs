@@ -1,5 +1,6 @@
 ﻿using Authix.Auth.Models;
-using Authix.Auth.Services;
+using Authix.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -11,15 +12,14 @@ public static class LoginEndpoint
 {
     public static void MapLoginEndpoint(this IEndpointRouteBuilder app)
     {
-        app.MapPost("/login", async (LoginRequest login, IConfiguration config) =>
+        app.MapPost("/login", async (LoginRequest login, AuthixDbContext db, IConfiguration config) =>
         {
-            var user = UserStore.Find(login.Username);
+            var user = await db.Users.FirstOrDefaultAsync(u => u.Username == login.Username);
 
-            if (user is null || user.PasswordHash != login.Password)
+            if (user is null || !BCrypt.Net.BCrypt.Verify(login.Password, user.PasswordHash))
+            {
                 return Results.Unauthorized();
-
-            if (user.Role == Role.Wanderer)
-                return Results.Forbid();
+            }
 
             var jwtOptions = config.GetSection("Jwt").Get<JwtOptions>();
 

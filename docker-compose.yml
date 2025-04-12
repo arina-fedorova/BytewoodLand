@@ -16,8 +16,10 @@ services:
       dockerfile: services/Authix.Auth/Dockerfile
     ports:
       - "5001:8080"
+    volumes:
+      - ./data:/app/data
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Docker
 
   tweetle.messenger:
     build:

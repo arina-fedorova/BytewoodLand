@@ -1,10 +1,15 @@
-﻿namespace Authix.Auth.Models;
+﻿using Authix.Data.Models;
 
-public record User
+namespace Authix.Auth.Models;
+
+public class User
 {
-    public string Username { get; init; }
-    public Role Role { get; init; }
-    public string PasswordHash { get; set; }
+    public int Id { get; set; }
+    public string Username { get; set; } = string.Empty;
+    public Role Role { get; set; }
+    public string PasswordHash { get; set; } = string.Empty;
+
+    internal User() { }
 
     public User(string username, Role role, string passwordHash)
     {
