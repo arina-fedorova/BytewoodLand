@@ -11,41 +11,51 @@ using System.Text;
 
 namespace Authix.Auth.Endpoints;
 
-public static class LoginEndpoint
+public static class RefreshEndpoint
 {
-    public static void MapLoginEndpoint(this IEndpointRouteBuilder app)
+    public static void MapRefreshEndpoint(this IEndpointRouteBuilder app)
     {
-        app.MapPost("/login", async (LoginRequest login, AuthixDbContext dbContext, IConfiguration config) =>
+        app.MapPost("/refresh", async (RefreshRequest request, IConfiguration config, AuthixDbContext dbContext) =>
         {
-            var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Username == login.Username);
+            var existing = await dbContext.RefreshTokens
+                .Include(rt => rt.User)
+                .FirstOrDefaultAsync(rt =>
+                    rt.Token == request.RefreshToken &&
+                    rt.ExpiresAt > DateTime.UtcNow &&
+                    !rt.IsUsed);
 
-            if (user is null || !BCrypt.Net.BCrypt.Verify(login.Password, user.PasswordHash))
+            if (existing is null)
             {
                 return Results.Unauthorized();
             }
 
+            var user = existing.User!;
             var jwtOptions = JwtSettingsProvider.Get(config);
 
             var accessToken = TokenFactory.CreateAccessToken(user.Username, user.Role, jwtOptions);
 
-            var refreshToken = new RefreshToken
+            var newRefreshToken = new RefreshToken
             {
                 Token = Guid.NewGuid().ToString(),
                 ExpiresAt = DateTime.UtcNow.AddDays(7),
                 IsUsed = false,
                 UserId = user.Id
             };
-            dbContext.RefreshTokens.Add(refreshToken);
+
+            existing.IsUsed = true;
+            existing.ReplacedByToken = newRefreshToken.Token;
+
+            dbContext.RefreshTokens.Add(newRefreshToken);
             await dbContext.SaveChangesAsync();
 
             return Results.Ok(new
             {
                 access_token = accessToken,
-                refresh_token = refreshToken.Token
+                refresh_token = newRefreshToken.Token
             });
         })
             .WithTags("Auth")
-            .WithSummary("Login as a registered user")
-            .WithDescription("Requires password. Returns access and refresh tokens");
+            .WithSummary("Refresh access token")
+            .WithDescription("Exchanges a refresh token for a new access token.");
     }
 }

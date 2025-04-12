@@ -9,6 +9,8 @@ public class User
     public Role Role { get; set; }
     public string PasswordHash { get; set; } = string.Empty;
 
+    public List<RefreshToken> RefreshTokens { get; set; } = new();
+
     internal User() { }
 
     public User(string username, Role role, string passwordHash)

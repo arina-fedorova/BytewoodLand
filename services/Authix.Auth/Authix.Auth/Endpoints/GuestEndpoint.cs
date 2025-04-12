@@ -1,5 +1,6 @@
 ﻿using Authix.Auth.Configuration;
 using Authix.Auth.Helpers;
+using Authix.Auth.Models;
 using Authix.Data.Models;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -16,24 +17,9 @@ public static class GuestEndpoint
         {
             var jwtOptions = JwtSettingsProvider.Get(config);
 
-            var claims = new[]
-            {
-                new Claim(ClaimTypes.Name, userName),
-                new Claim(ClaimTypes.Role, Role.Wanderer.ToString().ToLower())
-            };
+            var accessToken = TokenFactory.CreateAccessToken(userName, Role.Wanderer, jwtOptions);
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecretKey));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var token = new JwtSecurityToken(
-                issuer: jwtOptions.Issuer,
-                audience: jwtOptions.Audience,
-                claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(30),
-                signingCredentials: creds
-            );
-
-            return Results.Ok(new { token = new JwtSecurityTokenHandler().WriteToken(token) });
+            return Results.Ok(new { token = accessToken });
         })
             .WithTags("Auth")
             .WithSummary("Login as a guest wanderer")

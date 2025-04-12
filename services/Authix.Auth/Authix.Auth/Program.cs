@@ -1,11 +1,31 @@
+using Authix.Auth.Configuration;
 using Authix.Auth.Endpoints;
 using Authix.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        var jwtOptions = JwtSettingsProvider.Get(builder.Configuration);
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = jwtOptions.Issuer,
+            ValidateAudience = true,
+            ValidAudience = jwtOptions.Audience,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecretKey)),
+            ValidateLifetime = true
+        };
+    });
+builder.Services.AddAuthorization();
 
 builder.Services.AddDbContext<AuthixDbContext>(options =>
 {
@@ -21,7 +41,12 @@ if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName == "Docke
     app.UseSwaggerUI();
 }
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapLoginEndpoint();
 app.MapGuestEndpoint();
+app.MapRefreshEndpoint();
+app.MapDeleteTokenEndpoint();
 
 app.Run();

@@ -3,6 +3,7 @@ using System;
 using Authix.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Authix.Data.Migrations
 {
     [DbContext(typeof(AuthixDbContext))]
-    partial class AuthixDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250412130337_AddRefreshToken")]
+    partial class AddRefreshToken
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.15");
@@ -45,35 +48,35 @@ namespace Authix.Data.Migrations
                         new
                         {
                             Id = 1,
-                            PasswordHash = "$2a$11$VNEkBrgMJXymYqcS65NtL.m1qR9.wz4d4Svt99fPgCumBvRlpeA2i",
+                            PasswordHash = "$2a$11$GpbeYv4my6ggMt/7NUrzn..Rj8oI9Tu7kbkKgNu7HuIfuj/UFfela",
                             Role = 2,
                             Username = "Squee"
                         },
                         new
                         {
                             Id = 2,
-                            PasswordHash = "$2a$11$fW9uzlJELZtueHcI.x5RsuZoFHBZ2dt8SqTiHIex8.NMQYiXw.GOK",
+                            PasswordHash = "$2a$11$OceXakLyDTP6Q4CoPyLO5.sYK4KQXEkpQ6nz1zhhQGb/CSZhcOz4a",
                             Role = 2,
                             Username = "Owla"
                         },
                         new
                         {
                             Id = 3,
-                            PasswordHash = "$2a$11$I0Nb2ZI71zphHUoodfIoOuTUbV2iE9eVW072QRe/2R83Ieg81pSPi",
+                            PasswordHash = "$2a$11$9Z.uzQykMRtMsIxe4ti0jeMhYwPUAMlYIqFYDkijtgnPptOE8rBeG",
                             Role = 1,
                             Username = "Casha"
                         },
                         new
                         {
                             Id = 4,
-                            PasswordHash = "$2a$11$kbVYSybvTkntkWq1FEz2b.KAjCKPsMSwyhJuJdSANUO2Mb3K9Mfmy",
+                            PasswordHash = "$2a$11$Ny4tc67XIGBT4.CAAiVXru27HyPgBBjDM0AXxb408XxiZa6o03Lsq",
                             Role = 2,
                             Username = "Tweetle"
                         },
                         new
                         {
                             Id = 5,
-                            PasswordHash = "$2a$11$ZGiexl2jEVGlFU/JJ8LFiuNdCvsZlWOTi27XS4YqVx3zX6lOCIga6",
+                            PasswordHash = "$2a$11$fx2g3etcB/lrB6FGpJLVhOXW0WumAnUnazM.CWVqR/cImt0Z8u266",
                             Role = 1,
                             Username = "Grizzle"
                         });
@@ -90,9 +93,6 @@ namespace Authix.Data.Migrations
 
                     b.Property<bool>("IsUsed")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("ReplacedByToken")
-                        .HasColumnType("TEXT");
 
                     b.Property<string>("Token")
                         .IsRequired()

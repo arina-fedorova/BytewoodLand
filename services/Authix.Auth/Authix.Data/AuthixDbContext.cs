@@ -9,9 +9,18 @@ public class AuthixDbContext : DbContext
 
     public DbSet<User> Users => Set<User>();
 
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<User>().HasIndex(u => u.Username).IsUnique();
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.Username)
+            .IsUnique();
+
+        modelBuilder.Entity<User>()
+            .HasMany(u => u.RefreshTokens)
+            .WithOne(rt => rt.User!)
+            .HasForeignKey(rt => rt.UserId);
 
         modelBuilder.Entity<User>().HasData(
             new User { Id = 1, Username = "Squee", Role = Role.Scout, PasswordHash = BCrypt.Net.BCrypt.HashPassword("squeescout") },
@@ -20,5 +29,7 @@ public class AuthixDbContext : DbContext
             new User { Id = 4, Username = "Tweetle", Role = Role.Scout, PasswordHash = BCrypt.Net.BCrypt.HashPassword("tweetlescout") },
             new User { Id = 5, Username = "Grizzle", Role = Role.Guardian, PasswordHash = BCrypt.Net.BCrypt.HashPassword("grizzleguardian") }
         );
+
+        base.OnModelCreating(modelBuilder);
     }
 }

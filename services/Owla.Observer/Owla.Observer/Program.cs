@@ -1,7 +1,14 @@
+using Owla.Observer.Configuration;
+using Owla.Observer.Services;
+
 Host.CreateDefaultBuilder(args)
-    .ConfigureServices(services =>
+    .ConfigureServices((context, services) =>
     {
-        services.AddHttpClient(); // Needed for pinging services
+        services.Configure<OwlaIdentityOptions>(
+            context.Configuration.GetSection("OwlaIdentity"));
+
+        services.AddHttpClient();
+        services.AddSingleton<OwlaTokenProvider>();
         services.AddHostedService<OwlaWorker>();
     })
     .ConfigureLogging(logging =>
