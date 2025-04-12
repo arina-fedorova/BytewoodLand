@@ -6,17 +6,16 @@ public static class UserStore
 {
     public static readonly List<User> All = new()
     {
-        new("Squee", Role.Scout),
-        new("Owla", Role.Scout),
-        new("Casha", Role.Guardian),
-        new("Tweetle", Role.Scout),
-        new("Grizzle", Role.Guardian)
+        // TODO: replace plain-text password with hashed password
+        new("Squee", Role.Scout, "squeescout"),
+        new("Owla", Role.Scout, "owlascout"),
+        new("Casha", Role.Guardian, "cashaguardian"),
+        new("Tweetle", Role.Scout, "tweetlescout"),
+        new("Grizzle", Role.Guardian, "grizzleguardian")
     };
 
-    public static User Find(string username)
+    public static User? Find(string username)
     {
-        var user = All.FirstOrDefault(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
-
-        return user ?? new(username, Role.Wanderer);
+        return All.FirstOrDefault(u => u.Username.Equals(username));
     }
 }

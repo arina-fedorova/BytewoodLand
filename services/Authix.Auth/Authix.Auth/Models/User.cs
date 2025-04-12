@@ -4,8 +4,9 @@ public record User
 {
     public string Username { get; init; }
     public Role Role { get; init; }
+    public string PasswordHash { get; set; }
 
-    public User(string username, Role role)
+    public User(string username, Role role, string passwordHash)
     {
         if (role == Role.Wanderer)
         {
@@ -14,6 +15,7 @@ public record User
 
         Username = username;
         Role = role;
+        PasswordHash = passwordHash;
     }
 
     public override string ToString()

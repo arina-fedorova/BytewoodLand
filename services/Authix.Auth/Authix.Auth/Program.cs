@@ -1,8 +1,4 @@
-using Authix.Auth.Services;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
+using Authix.Auth.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,32 +15,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.MapPost("/token", (string username, IConfiguration config) =>
-{
-    var user = UserStore.Find(username);
-    var jwtOptions = config.GetSection("Jwt").Get<JwtOptions>();
-
-    var claims = new[]
-    {
-        new Claim(ClaimTypes.Name, user.Username),
-        new Claim(ClaimTypes.Role, user.Role.ToString().ToLower())
-    };
-
-    var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions!.SecretKey));
-    var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-    var token = new JwtSecurityToken(
-        issuer: jwtOptions.Issuer,
-        audience: jwtOptions.Audience,
-        claims: claims,
-        expires: DateTime.UtcNow.AddHours(1),
-        signingCredentials: creds
-    );
-
-    return Results.Ok(new
-    {
-        token = new JwtSecurityTokenHandler().WriteToken(token)
-    });
-});
+app.MapLoginEndpoint();
+app.MapGuestEndpoint();
 
 app.Run();
