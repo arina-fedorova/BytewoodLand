@@ -2,7 +2,8 @@
 
 > "Even in chaos, I deliver."
 
-Tweetle zips across Bytewood delivering messages between services. No matter the storm, Tweetle ensures each message reaches its destination — eventually and reliably.
+Tweetle zips across Bytewood delivering messages between services. No matter the storm, Tweetle ensures each message
+reaches its destination — eventually and reliably.
 
 ## 🔧 Purpose
 

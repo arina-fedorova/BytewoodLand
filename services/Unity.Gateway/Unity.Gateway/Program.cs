@@ -1,10 +1,8 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Unity.Gateway.Configuration;
 using Unity.Gateway.Endpoints;
-using Unity.Gateway.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 

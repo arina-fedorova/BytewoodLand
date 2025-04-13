@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.Design;
 
 namespace Authix.Data;
+
 public class AuthixDbContextFactory : IDesignTimeDbContextFactory<AuthixDbContext>
 {
     public AuthixDbContext CreateDbContext(string[] args)

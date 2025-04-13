@@ -2,7 +2,8 @@
 
 > "Time is sacred. I keep the rhythm."
 
-Squee keeps Bytewood’s routines in check. Every morning, every midnight — she ensures the forest runs on time, triggering jobs, reminders, and tasks across the land.
+Squee keeps Bytewood’s routines in check. Every morning, every midnight — she ensures the forest runs on time,
+triggering jobs, reminders, and tasks across the land.
 
 ## 🔧 Purpose
 

@@ -2,7 +2,8 @@
 
 > "Why ask again, when I already know?"
 
-Casha quietly remembers answers others keep asking. She provides a safe, fast place to store and retrieve frequently-used data.
+Casha quietly remembers answers others keep asking. She provides a safe, fast place to store and retrieve
+frequently-used data.
 
 ## 🔧 Purpose
 

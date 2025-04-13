@@ -1,4 +1,6 @@
 ﻿using Authix.Data;
+using Bytewood.Contracts.Roles;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Authix.Auth.Endpoints;
 
@@ -7,18 +9,18 @@ public static class DeleteTokenEndpoint
     public static void MapDeleteTokenEndpoint(this IEndpointRouteBuilder app)
     {
         app.MapDelete("/tokens/expired", async (AuthixDbContext dbContext) =>
-        {
-            var now = DateTime.UtcNow;
-            var expired = dbContext.RefreshTokens.Where(rt => rt.ExpiresAt < now);
+            {
+                var now = DateTime.UtcNow;
+                var expired = dbContext.RefreshTokens.Where(rt => rt.ExpiresAt < now);
 
-            dbContext.RefreshTokens.RemoveRange(expired);
-            var deleted = await dbContext.SaveChangesAsync();
+                dbContext.RefreshTokens.RemoveRange(expired);
+                var deleted = await dbContext.SaveChangesAsync();
 
-            return Results.Ok(new { deleted });
-        })
+                return Results.Ok(new { deleted });
+            })
             .WithTags("Maintenance")
             .WithSummary("Deletes expired refresh tokens")
             .WithDescription("Used by Owla 🦉 to clean up old junk.")
-            .RequireAuthorization();
+            .RequireAuthorization(new AuthorizeAttribute { Roles = ServiceRole.Observer.AsString() });
     }
 }

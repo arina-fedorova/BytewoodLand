@@ -1,9 +1,11 @@
 # Unity the Gateway 🦄
 
 > "One gate to route them all, and through the gateway bind them."
-> 
+>
 
-**Unity** is the enchanted entryway to the Bytewood realm. It stands at the boundary, validating every traveler’s token and guiding them toward the correct Byte Beast — all while ensuring the secret paths remain safe from the curious and unworthy.
+**Unity** is the enchanted entryway to the Bytewood realm. It stands at the boundary, validating every traveler’s token
+and guiding them toward the correct Byte Beast — all while ensuring the secret paths remain safe from the curious and
+unworthy.
 
 ---
 
@@ -27,10 +29,10 @@ Unity enforces strict access rules:
 
 ### Recognized Roles
 
-| Role | Description |
-| --- | --- |
-| `guardian` | Full access to protected zones 🌲 |
-| `scout` | Limited access, for observers 🦊 |
+| Role       | Description                              |
+|------------|------------------------------------------|
+| `guardian` | Full access to protected zones 🌲        |
+| `scout`    | Limited access, for observers 🦊         |
 | `wanderer` | Guests — access public endpoints only 🌿 |
 
 ---
@@ -46,15 +48,15 @@ Unity enforces strict access rules:
 
 ### 🗺️ Routes Overview
 
-| Method | Path | Access | Role Required | Description |
-| --- | --- | --- | --- | --- |
-| GET | `/` | Public | ❌ | Friendly welcome message |
-| GET | `/public-info` | Public | ❌ | Available to all wanderers |
-| GET | `/ping` | Public | ❌ | Health check |
-| GET | `/protected` | Protected | Any | Echoes current user's name & role |
-| GET | `/me` | Protected | Any | Returns authenticated user's identity |
-| GET | `/secret-forest` | Protected | `guardian` | Hidden grove for trusted guardians |
-| GET | `/scout-hq` | Protected | `scout` | Base for scouting and observation |
+| Method | Path             | Access    | Role Required | Description                           |
+|--------|------------------|-----------|---------------|---------------------------------------|
+| GET    | `/`              | Public    | ❌             | Friendly welcome message              |
+| GET    | `/public-info`   | Public    | ❌             | Available to all wanderers            |
+| GET    | `/ping`          | Public    | ❌             | Health check                          |
+| GET    | `/protected`     | Protected | Any           | Echoes current user's name & role     |
+| GET    | `/me`            | Protected | Any           | Returns authenticated user's identity |
+| GET    | `/secret-forest` | Protected | `guardian`    | Hidden grove for trusted guardians    |
+| GET    | `/scout-hq`      | Protected | `scout`       | Base for scouting and observation     |
 
 🛡️ Unauthorized access returns `401 Unauthorized` or `403 Forbidden`.
 
@@ -95,10 +97,10 @@ Unity.Gateway/
 
 ## 🔐 Environment Variables
 
-| Name | Description |
-| --- | --- |
-| `JWT_SECRET` | Must match the signing key used in Authix |
-| `ASPNETCORE_ENVIRONMENT` | Set to `Development` or `Docker` |
+| Name                     | Description                               |
+|--------------------------|-------------------------------------------|
+| `JWT_SECRET`             | Must match the signing key used in Authix |
+| `ASPNETCORE_ENVIRONMENT` | Set to `Development` or `Docker`          |
 
 ### Example
 

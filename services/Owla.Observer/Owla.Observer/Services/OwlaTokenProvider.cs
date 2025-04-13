@@ -32,10 +32,10 @@ public class OwlaTokenProvider
         {
             try
             {
-                var response = await client.PostAsJsonAsync("http://authix.auth:8080/login", new
+                var response = await client.PostAsJsonAsync("http://authix.auth:8080/auth/client", new
                 {
-                    _options.Username,
-                    _options.Password
+                    ClientId = _options.Username,
+                    ClientSecret = _options.Secret
                 });
                 response.EnsureSuccessStatusCode();
 

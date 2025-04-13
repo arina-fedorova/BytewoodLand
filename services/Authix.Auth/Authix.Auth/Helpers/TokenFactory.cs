@@ -1,20 +1,19 @@
-﻿using Authix.Auth.Models;
-using Authix.Data.Models;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Bytewood.Contracts.Roles;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Authix.Auth.Helpers;
 
 public static class TokenFactory
 {
-    public static string CreateAccessToken(string userName, Role role, JwtOptions options)
+    public static string CreateAccessToken(string userName, string role, JwtOptions options)
     {
         var claims = new[]
         {
             new Claim(ClaimTypes.Name, userName),
-            new Claim(ClaimTypes.Role, role.ToString().ToLower())
+            new Claim(ClaimTypes.Role, role)
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(options.SecretKey));
