@@ -1,10 +1,10 @@
+using System.Text;
 using Authix.Auth.Configuration;
 using Authix.Auth.Endpoints;
 using Authix.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,5 +48,6 @@ app.MapLoginEndpoint();
 app.MapGuestEndpoint();
 app.MapRefreshEndpoint();
 app.MapDeleteTokenEndpoint();
+app.MapClientAuthEndpoint();
 
 app.Run();

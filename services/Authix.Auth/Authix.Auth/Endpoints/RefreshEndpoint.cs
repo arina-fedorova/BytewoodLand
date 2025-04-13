@@ -3,11 +3,8 @@ using Authix.Auth.Helpers;
 using Authix.Auth.Models;
 using Authix.Data;
 using Authix.Data.Models;
+using Bytewood.Contracts.Roles;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 
 namespace Authix.Auth.Endpoints;
 
@@ -16,44 +13,44 @@ public static class RefreshEndpoint
     public static void MapRefreshEndpoint(this IEndpointRouteBuilder app)
     {
         app.MapPost("/refresh", async (RefreshRequest request, IConfiguration config, AuthixDbContext dbContext) =>
-        {
-            var existing = await dbContext.RefreshTokens
-                .Include(rt => rt.User)
-                .FirstOrDefaultAsync(rt =>
-                    rt.Token == request.RefreshToken &&
-                    rt.ExpiresAt > DateTime.UtcNow &&
-                    !rt.IsUsed);
-
-            if (existing is null)
             {
-                return Results.Unauthorized();
-            }
+                var existing = await dbContext.RefreshTokens
+                    .Include(rt => rt.User)
+                    .FirstOrDefaultAsync(rt =>
+                        rt.Token == request.RefreshToken &&
+                        rt.ExpiresAt > DateTime.UtcNow &&
+                        !rt.IsUsed);
 
-            var user = existing.User!;
-            var jwtOptions = JwtSettingsProvider.Get(config);
+                if (existing is null)
+                {
+                    return Results.Unauthorized();
+                }
 
-            var accessToken = TokenFactory.CreateAccessToken(user.Username, user.Role, jwtOptions);
+                var user = existing.User!;
+                var jwtOptions = JwtSettingsProvider.Get(config);
 
-            var newRefreshToken = new RefreshToken
-            {
-                Token = Guid.NewGuid().ToString(),
-                ExpiresAt = DateTime.UtcNow.AddDays(7),
-                IsUsed = false,
-                UserId = user.Id
-            };
+                var accessToken = TokenFactory.CreateAccessToken(user.Username, user.Role.AsString(), jwtOptions);
 
-            existing.IsUsed = true;
-            existing.ReplacedByToken = newRefreshToken.Token;
+                var newRefreshToken = new RefreshToken
+                {
+                    Token = Guid.NewGuid().ToString(),
+                    ExpiresAt = DateTime.UtcNow.AddDays(7),
+                    IsUsed = false,
+                    UserId = user.Id
+                };
 
-            dbContext.RefreshTokens.Add(newRefreshToken);
-            await dbContext.SaveChangesAsync();
+                existing.IsUsed = true;
+                existing.ReplacedByToken = newRefreshToken.Token;
 
-            return Results.Ok(new
-            {
-                access_token = accessToken,
-                refresh_token = newRefreshToken.Token
-            });
-        })
+                dbContext.RefreshTokens.Add(newRefreshToken);
+                await dbContext.SaveChangesAsync();
+
+                return Results.Ok(new
+                {
+                    access_token = accessToken,
+                    refresh_token = newRefreshToken.Token
+                });
+            })
             .WithTags("Auth")
             .WithSummary("Refresh access token")
             .WithDescription("Exchanges a refresh token for a new access token.");

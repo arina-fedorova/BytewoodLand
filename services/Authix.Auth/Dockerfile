@@ -1,7 +1,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-COPY shared/Bytewood.Contracts ./shared/Bytewood.Contracts
+COPY shared/Bytewood.Contracts /shared/Bytewood.Contracts
 COPY services/Authix.Auth/Authix.Auth ./services/Authix.Auth
 COPY services/Authix.Auth/Authix.Data ./services/Authix.Data
 

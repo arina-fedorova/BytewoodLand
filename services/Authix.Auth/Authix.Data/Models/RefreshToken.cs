@@ -1,6 +1,7 @@
 ﻿using Authix.Auth.Models;
 
 namespace Authix.Data.Models;
+
 public class RefreshToken
 {
     public int Id { get; set; }

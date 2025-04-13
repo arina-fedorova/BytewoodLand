@@ -1,7 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Bytewood.Contracts.Roles;
+using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
-using Unity.Gateway.Helpers;
-using Unity.Gateway.Models;
 
 namespace Unity.Gateway.Endpoints;
 
@@ -20,13 +19,13 @@ public static class ProtectedEndpoints
         {
             var name = user.Identity?.Name ?? "unknown";
             return $"🌳 Welcome to the secret forest, Guardian {name}.";
-        }).RequireAuthorization(new AuthorizeAttribute { Roles = Role.Guardian.AsString() });
+        }).RequireAuthorization(new AuthorizeAttribute { Roles = UserRole.Guardian.AsString() });
 
         app.MapGet("/scout-hq", (ClaimsPrincipal user) =>
         {
             var name = user.Identity?.Name ?? "unknown";
             return $"🦊 Scout {name}, your event scrolls await!";
-        }).RequireAuthorization(new AuthorizeAttribute { Roles = Role.Scout.AsString() });
+        }).RequireAuthorization(new AuthorizeAttribute { Roles = UserRole.Scout.AsString() });
 
         app.MapGet("/me", (ClaimsPrincipal user) =>
         {

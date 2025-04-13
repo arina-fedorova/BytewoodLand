@@ -10,6 +10,7 @@
 
 - 🩺 **Service observability**
 - 🌡️ **Health checks and uptime monitoring**
+- 🧹 Automatic cleanup of expired tokens in Authix
 - 📓 **Structured logging (planned: external aggregation)**
 - 🛎️ **Alert triggers for failure events**
 - 🧠 Central logic for future **system telemetry**
@@ -21,17 +22,18 @@
 - **.NET 8** Worker Service
 - `HttpClient` + **dependency injection**
 - **ILogger** / Serilog (future log pipeline)
+- JWT-based auth against **Authix**
 - (Planned) **OpenTelemetry**, **Prometheus**, or **ELK**
 
 ---
 
 ## 📡 What Owla Tracks
 
-- ✅ **Gateway health** (`GET /ping` to Unity)
-- ✅ **Expired refresh token cleanup** (via `DELETE /tokens/expired` in Authix)
-- 🔜 Service heartbeats and latencies
-- 🔜 Central logging + traces
-- 🔜 Performance telemetry
+| Target | Endpoint | Purpose |
+| --- | --- | --- |
+| Unity 🦄 | `GET /ping` | Gateway health check |
+| Authix 🐉 | `DELETE /tokens/expired` | Cleanup expired refresh tokens |
+| 🔮 Future Beasts | – | Metrics, logs, alerts |
 
 ---
 
@@ -40,44 +42,41 @@
 Every **10 seconds**, Owla:
 
 1. Pings `Unity.Gateway` for availability.
-2. Authenticates with `Authix.Auth` as a scout.
+2. Authenticates with `Authix.Auth` via `/auth/client` (service client).
 3. Calls `DELETE /tokens/expired` to clear stale refresh tokens.
-4. Logs all outcomes with expressive emoji-enhanced messages 🦉✨
+4. Logs results with structured `ILogger`.
 
 ---
 
 ## 🧩 Integration Points
 
 - 🦄 **Unity.Gateway** — checked for availability
-- 🐉 **Authix.Auth** — cleanup and token purge
+- 🐉 **Authix.Auth** — service-to-service authentication and token cleanup
 - 🧪 Future Byte Beasts — metrics, alerts, trace correlation
 
 ---
 
 ## ⚙️ Configuration Notes
 
-Owla authenticates using standard login flow:
-
-- Username: `"Owla"`
-- Role: `scout`
-- Password: stored securely via BCrypt
-
-Add required environment variables (or Docker secrets) for:
+Owla uses **service client auth**, not user login.
 
 ```bash
-OWLA_USERNAME=Owla
-OWLA_PASSWORD=owlascout
 AUTHIX_URL=http://authix.auth:8080
 UNITY_URL=http://unity.gateway:8080
+
+OWLA_CLIENT_ID=owla
+OWLA_CLIENT_SECRET=owlasecret
 ```
+
+Set these via environment variables or secrets provider (Docker, Azure, etc) - TBD.
 
 ---
 
 ## 🧙 Deployment
 
 - Included in `docker-compose.yml`
-- Automatically starts with the rest of Bytewood
-- Uses shared `bytewoodnet` network to talk to services by name
+- Part of `bytewoodnet` internal network
+- Runs continuously as `BackgroundService`
 
 ---
 
@@ -85,10 +84,10 @@ UNITY_URL=http://unity.gateway:8080
 
 - [ ]  Centralized structured logging (e.g., Seq or ELK)
 - [ ]  Prometheus metrics exporter
-- [ ]  Service uptime dashboard
-- [ ]  Failure trend analysis
-- [ ]  Alert integration (Slack, email, etc.)
-- [ ]  Support for gRPC service pings
+- [ ]  Graph-based service uptime dashboard
+- [ ]  Alert integration (Slack / Email / PagerDuty)
+- [ ]  Automatic retry + alert escalation
+- [ ]  Tracing correlation across services (OpenTelemetry)
 
 ---
 

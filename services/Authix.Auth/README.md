@@ -11,8 +11,9 @@
 - 🧙‍♀️ Authenticate known Bytewood identities
 - 🔐 Issue secure, signed JWT access tokens
 - 🔄 Manage and validate refresh tokens
-- 🧠 Assign roles via a central enum (`Role`)
+- 🧠 Assign roles via `UserRole` and `ServiceRole` enums
 - 🪄 Gracefully handle guests and registered users
+- 🧼 Enable internal cleanup of expired tokens
 - ❌ Enforce `wanderer` as a non-persistent role
 
 ---
@@ -21,13 +22,25 @@
 
 Authix uses **Entity Framework Core (SQLite)** for persistence and includes:
 
-- `User` with:
-    - `Username` (unique)
-    - `Role` (`guardian`, `scout`, `wanderer`)
-    - `PasswordHash` (BCrypt)
-- `RefreshToken` with expiration, usage flag, and user linkage
+### 🧍 Users:
 
-> 🔒 wanderer is a reserved role and can’t be stored in the database.
+- `Username` (unique)
+- `PasswordHash` (BCrypt)
+- `Role` (`guardian`, `scout`, `wanderer`)
+
+### 🔐 Service Clients:
+
+- `ClientId`
+- `SecretHash` (BCrypt)
+- `Role` (`identity`, `observer`, `cache`, etc)
+
+### ♻️ Refresh Tokens:
+
+- Tied to users only
+- Expiration tracking
+- Marked as used and rotated
+
+> 🪧 The wanderer role is reserved for unauthenticated guests and cannot be stored in the database.
 
 ---
 
@@ -35,30 +48,22 @@ Authix uses **Entity Framework Core (SQLite)** for persistence and includes:
 
 | Type | Endpoint | Description |
 | --- | --- | --- |
-| 🧙‍♀️ Registered | `POST /login` | Authenticate with username + password |
+| 🧙 Registered | `POST /login` | Authenticate with username + password |
 | 🌫️ Guest | `POST /guest?name=...` | Generate short-lived token for wanderers |
+| 🤖 Service | `POST /auth/client` | Authenticate services via `client_id` + `secret` |
 | ♻️ Refresh | `POST /refresh` | Exchange refresh token for a new access token |
 
-All JWTs include standard claims:
-
-```json
-{
-  "name": "Casha",
-  "role": "guardian",
-  "iss": "bytewood.authix",
-  "aud": "bytewood"
-}
-
-```
+---
 
 ## 🔐 Endpoints
 
-| Method | Path | Purpose |
+| Method | Path | Summary |
 | --- | --- | --- |
-| `POST` | `/login` | Login with password, receive JWT + refresh |
-| `POST` | `/guest` | Anonymous token for wanderers |
-| `POST` | `/refresh` | Exchange refresh token |
-| `DELETE` | `/tokens/expired` | Cleanup expired or used tokens *(internal)* |
+| `POST` | `/login` | Login with credentials, return JWT + refresh |
+| `POST` | `/guest` | Wanderer login without password |
+| `POST` | `/refresh` | Exchange valid refresh token |
+| `POST` | `/auth/client` | Issue token to known service client |
+| `DELETE` | `/tokens/expired` | Delete expired refresh tokens (used by Owla) |
 
 ---
 
@@ -75,6 +80,8 @@ All JWTs include standard claims:
 ## 📁 Project Structure
 
 ```
+pgsql
+CopyEdit
 Authix.Auth/
 ├── Configuration/
 │   └── JwtOptions.cs
@@ -84,27 +91,32 @@ Authix.Auth/
 │   ├── GuestEndpoint.cs
 │   ├── RefreshEndpoint.cs
 │   └── DeleteTokenEndpoint.cs
+│   └── ClientAuthEndpoint.cs
 ├── Models/
 │   ├── LoginRequest.cs
 │   └── RefreshRequest.cs
+│   └── ClientAuthRequest.cs
 └── Program.cs
 
 Authix.Data/
 ├── AuthixDbContext.cs
 ├── AuthixDbContextFactory.cs
 ├── Models/
-│   ├── Role.cs
 │   ├── User.cs
 │   └── RefreshToken.cs
+│   └── ServiceClient.cs
 
 ```
 
 ---
 
-## 🌐 Integration Points
+## 🧩 Integration Points
 
-- ✅ **Unity.Gateway** validates and authorizes requests using tokens issued by Authix
-- ✅ **Owla.Observer** logs in automatically and cleans up expired tokens via internal APIs
+| Service | Usage |
+| --- | --- |
+| 🦄 **Unity.Gateway** | Uses Authix-issued tokens to validate users |
+| 🦉 **Owla.Observer** | Logs in as service and calls cleanup APIs |
+| 🔮 Other Beasts | Use JWT for scoped communication |
 
 ---
 
