@@ -1,7 +1,9 @@
+using System.Security.Claims;
 using System.Text;
 using Authix.Auth.Configuration;
 using Authix.Auth.Endpoints;
 using Authix.Data;
+using Bytewood.Contracts.Roles;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -25,7 +27,34 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateLifetime = true
         };
     });
-builder.Services.AddAuthorization();
+
+builder.Services.AddAuthorization(options =>
+{
+    // User-based policies
+    options.AddPolicy("GuardianOnly", policy =>
+        policy.RequireRole(UserRole.Guardian.AsString()));
+    
+    options.AddPolicy("ScoutOnly", policy =>
+        policy.RequireRole(UserRole.Scout.AsString()));
+
+    options.AddPolicy("AnyUser", policy =>
+        policy.RequireAssertion(context =>
+            Enum.TryParse<UserRole>(context.User.FindFirstValue(ClaimTypes.Role), true, out var role) &&
+            role != UserRole.Wanderer
+        ));
+
+    // Service-based policies
+    options.AddPolicy("WardenOnly", policy =>
+        policy.RequireRole(ServiceRole.Observer.AsString()));
+
+    options.AddPolicy("IdentityOnly", policy =>
+        policy.RequireRole(ServiceRole.Identity.AsString()));
+
+    options.AddPolicy("TrustedService", policy =>
+        policy.RequireAssertion(context =>
+            Enum.TryParse<ServiceRole>(context.User.FindFirstValue(ClaimTypes.Role), true, out _)
+        ));
+});
 
 builder.Services.AddDbContext<AuthixDbContext>(options =>
 {

@@ -21,6 +21,6 @@ public static class DeleteTokenEndpoint
             .WithTags("Maintenance")
             .WithSummary("Deletes expired refresh tokens")
             .WithDescription("Used by Owla 🦉 to clean up old junk.")
-            .RequireAuthorization(new AuthorizeAttribute { Roles = ServiceRole.Observer.AsString() });
+            .RequireAuthorization("WardenOnly");
     }
 }

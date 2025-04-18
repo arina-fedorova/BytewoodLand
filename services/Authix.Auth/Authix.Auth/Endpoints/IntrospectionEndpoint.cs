@@ -37,7 +37,7 @@ public static class IntrospectionEndpoint
                     return Results.Ok(new TokenIntrospectionResponse
                     {
                         IsValid = true,
-                        Subject = claims.GetValueOrDefault(ClaimTypes.Name),
+                        Subject = claims.GetValueOrDefault(ClaimTypes.NameIdentifier),
                         Role = claims.GetValueOrDefault(ClaimTypes.Role),
                         ExpiresAt = (validatedToken as JwtSecurityToken)?.ValidTo
                     });
@@ -53,7 +53,6 @@ public static class IntrospectionEndpoint
             .WithTags("Auth")
             .WithSummary("Introspects a JWT token")
             .WithDescription("Validates a JWT and returns metadata (for tooling or diagnostics).")
-            .RequireAuthorization(policy =>
-                policy.RequireRole(ServiceRole.Observer.AsString(), ServiceRole.Gateway.AsString()));
+            .RequireAuthorization("TrustedService");
     }
 }
