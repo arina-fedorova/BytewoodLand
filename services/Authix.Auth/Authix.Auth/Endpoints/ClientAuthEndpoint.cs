@@ -23,13 +23,14 @@ public static class ClientAuthEndpoint
                     }
 
                     var jwtOptions = JwtSettingsProvider.Get(config);
-                    var accessToken = TokenFactory.CreateAccessToken(client.ClientId, client.Role.AsString(), jwtOptions);
+                    var accessToken = TokenFactory.CreateAccessToken(client.ClientId, client.Role.AsString(),
+                        jwtOptions, lifetimeOverride: TimeSpan.FromHours(12));
 
                     return Results.Ok(new
                     {
                         access_token = accessToken
                     });
-              })
+                })
             .WithTags("Auth")
             .WithSummary("Authenticate service client")
             .WithDescription("Authenticates a service via client_id and secret.");
