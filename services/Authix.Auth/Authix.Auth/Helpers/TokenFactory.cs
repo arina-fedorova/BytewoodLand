@@ -8,7 +8,7 @@ namespace Authix.Auth.Helpers;
 
 public static class TokenFactory
 {
-    public static string CreateAccessToken(string userName, string role, JwtOptions options)
+    public static string CreateAccessToken(string userName, string role, JwtOptions options, TimeSpan? lifetimeOverride = null)
     {
         var claims = new[]
         {
@@ -19,11 +19,13 @@ public static class TokenFactory
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(options.SecretKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
+        var expires = DateTime.UtcNow.Add(lifetimeOverride ?? TimeSpan.FromMinutes(30));
+
         var token = new JwtSecurityToken(
             issuer: options.Issuer,
             audience: options.Audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(30),
+            expires: expires,
             signingCredentials: creds
         );
 
