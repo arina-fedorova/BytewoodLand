@@ -70,6 +70,8 @@ __pycache__/
 
 # Ignore database files
 /data/*.db
+/data/*.db-shm
+/data/*.db-wal
 
 # But keep the folder (so Docker mounts work)
 !data/.gitkeep

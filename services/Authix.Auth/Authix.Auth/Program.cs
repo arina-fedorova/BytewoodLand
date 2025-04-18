@@ -49,5 +49,6 @@ app.MapGuestEndpoint();
 app.MapRefreshEndpoint();
 app.MapDeleteTokenEndpoint();
 app.MapClientAuthEndpoint();
+app.MapIntrospectionEndpoint();
 
 app.Run();
